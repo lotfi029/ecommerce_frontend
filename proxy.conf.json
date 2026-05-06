@@ -1,0 +1,16 @@
+{
+  "/catalog": {
+    "target": "http://localhost:5246",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/catalog": ""
+    }
+  },
+  "/user": {
+    "target": "http://localhost:7000",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/user": ""
+    }
+  }
+}
