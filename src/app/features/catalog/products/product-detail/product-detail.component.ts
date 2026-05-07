@@ -1,9 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { ProductService, ProductAttributeService, ProductCategoryService, ToastService } from '@core';
+import { forkJoin } from 'rxjs';
+import {
+  ProductService,
+  ProductAttributeService,
+  ProductCategoryService,
+  ToastService,
+} from '@core';
 import { BadgeComponent } from '@shared/components/badge/badge.component';
-import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
+import {
+  BreadcrumbComponent,
+  BreadcrumbItem,
+} from '@shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-product-detail',
@@ -65,7 +74,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
                     <div class="border-b pb-4 last:border-b-0">
                       <p class="text-sm text-gray-600">{{ attr.attributeName }}</p>
                       <p class="text-gray-900 font-medium">
-                        @if (Array.isArray(attr.value)) {
+                        @if (isArray(attr.value)) {
                           {{ attr.value.join(', ') }}
                         } @else {
                           {{ attr.value }}
@@ -113,7 +122,6 @@ export class ProductDetailComponent implements OnInit {
   product = signal<any>(null);
   attributes = signal<any[]>([]);
   categories = signal<any[]>([]);
-  Array = Array;
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Dashboard', url: '/dashboard' },
@@ -128,40 +136,32 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
+  isArray(val: unknown): val is unknown[] {
+    return Array.isArray(val);
+  }
+
   private loadProduct(id: string): void {
     this.loading.set(true);
     this.productService.getProductById(id).subscribe({
       next: (product: any) => {
         this.product.set(product);
-        this.loadAttributes(id);
-        this.loadCategories(id);
+        forkJoin([
+          this.attributeService.getProductAttributes(id),
+          this.categoryService.getProductCategories(id),
+        ]).subscribe({
+          next: ([attrResp, catResp]: any[]) => {
+            this.attributes.set(attrResp.data);
+            this.categories.set(catResp.data);
+            this.loading.set(false);
+          },
+          error: () => {
+            // Partial failure — still show product, clear loading
+            this.loading.set(false);
+          },
+        });
       },
-      error: (error: any) => {
+      error: () => {
         this.toastService.error('Failed to load product');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadAttributes(id: string): void {
-    this.attributeService.getProductAttributes(id).subscribe({
-      next: (response: any) => {
-        this.attributes.set(response.data);
-      },
-      error: (error: any) => {
-        console.error('Failed to load attributes', error);
-      },
-    });
-  }
-
-  private loadCategories(id: string): void {
-    this.categoryService.getProductCategories(id).subscribe({
-      next: (response: any) => {
-        this.categories.set(response.data);
-        this.loading.set(false);
-      },
-      error: (error: any) => {
-        console.error('Failed to load categories', error);
         this.loading.set(false);
       },
     });

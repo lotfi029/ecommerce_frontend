@@ -96,7 +96,7 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading.set(true);
-    this.productService.getAllProducts().subscribe({
+    this.productService.getAllProducts(this.page(), this.size()).subscribe({
       next: (response: any) => {
         this.products.set(response.data);
         this.total.set(response.total);

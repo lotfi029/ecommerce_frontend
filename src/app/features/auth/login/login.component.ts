@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -77,7 +77,7 @@ export class LoginComponent {
   private toastService = inject(ToastService);
 
   form: FormGroup;
-  loading = () => false;
+  loading = signal(false);
 
   constructor() {
     this.form = this.fb.group({
@@ -88,16 +88,19 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
+    this.loading.set(true);
 
     this.authService.login(this.form.value).subscribe({
       next: () => {
         this.toastService.success('Login successful!');
         const returnUrl = this.route.snapshot.queryParams['returnUrl'];
         this.router.navigate([returnUrl || '/dashboard']);
+        // loading stays true during navigation — intentional
       },
-      error: (error: any) => {
-        console.error('Login error:', error);
-      },
+      error: () => {
+        this.loading.set(false);
+        this.toastService.error('Login failed. Please check your credentials.');
+      }
     });
   }
 }

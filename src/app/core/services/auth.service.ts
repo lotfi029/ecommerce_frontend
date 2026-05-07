@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, throwError, EMPTY } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   LoginRequest,
@@ -28,16 +28,23 @@ export class AuthService {
   private loadUserFromStorage(): void {
     try {
       const token = localStorage.getItem('access_token');
-      if (token) {
-        this.getUserProfile().subscribe();
+      const refresh = localStorage.getItem('refresh_token');
+      // Only auto-load if BOTH tokens exist; don't trigger a potential 401 loop
+      if (token && refresh) {
+        this.getUserProfile().subscribe({
+          error: () => {
+            // Silently ignore — refresh interceptor will handle 401
+          }
+        });
       }
     } catch (error) {
       console.error('Error loading user from storage', error);
     }
   }
 
-  register(request: RegisterRequest): Observable<UserResponse> {
-    return this.http.post<UserResponse>(
+  // API returns 200 with no body
+  register(request: RegisterRequest): Observable<void> {
+    return this.http.post<void>(
       `${this.baseUrl}/user/api/v1/auths/register`,
       request
     );
@@ -66,25 +73,21 @@ export class AuthService {
     const refreshToken = localStorage.getItem('refresh_token');
 
     if (!token || !refreshToken) {
-      return of();
+      // Return an error so callers can react (logout, redirect)
+      return throwError(() => new Error('No tokens available for refresh'));
     }
 
-    const request: RefreshTokenRequest = {
-      token,
-      refreshToken,
-    };
+    const request: RefreshTokenRequest = { token, refreshToken };
 
-    return this.http
-      .post<LoginResponse>(
-        `${this.baseUrl}/user/api/v1/auths/refresh-token`,
-        request
-      )
-      .pipe(
-        tap((response) => {
-          localStorage.setItem('access_token', response.token);
-          localStorage.setItem('refresh_token', response.refreshToken);
-        })
-      );
+    return this.http.post<LoginResponse>(
+      `${this.baseUrl}/user/api/v1/auths/refresh-token`,
+      request
+    ).pipe(
+      tap((response) => {
+        localStorage.setItem('access_token', response.token);
+        localStorage.setItem('refresh_token', response.refreshToken);
+      })
+    );
   }
 
   revokeRefreshToken(): Observable<void> {
@@ -92,14 +95,10 @@ export class AuthService {
     const refreshToken = localStorage.getItem('refresh_token');
 
     if (!token || !refreshToken) {
-      return of(void 0);
+      return EMPTY;
     }
 
-    const request: RefreshTokenRequest = {
-      token,
-      refreshToken,
-    };
-
+    const request: RefreshTokenRequest = { token, refreshToken };
     return this.http.post<void>(
       `${this.baseUrl}/user/api/v1/auths/revoke-refresh-token`,
       request
@@ -107,23 +106,28 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<UserResponse> {
-    return this.http
-      .get<UserResponse>(`${this.baseUrl}/user/api/v1/users/profile`)
-      .pipe(
-        tap((user) => this.currentUserSubject.next(user)),
-        catchError(() => {
-          this.currentUserSubject.next(null);
-          return of();
-        })
-      );
+    return this.http.get<UserResponse>(
+      `${this.baseUrl}/user/api/v1/users/profile`
+    ).pipe(
+      tap((user) => this.currentUserSubject.next(user)),
+      catchError((err) => {
+        this.currentUserSubject.next(null);
+        return throwError(() => err);
+      })
+    );
   }
 
-  updateProfile(request: UpdateProfileRequest): Observable<UserResponse> {
-    return this.http
-      .put<UserResponse>(`${this.baseUrl}/user/api/v1/users`, request)
-      .pipe(
-        tap((user) => this.currentUserSubject.next(user))
-      );
+  // API returns 204 No Content — do not attempt to parse body
+  updateProfile(request: UpdateProfileRequest): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/user/api/v1/users`,
+      request
+    ).pipe(
+      tap(() => {
+        // Refresh the cached user profile after update
+        this.getUserProfile().subscribe();
+      })
+    );
   }
 
   deleteAccount(): Observable<void> {

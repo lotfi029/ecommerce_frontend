@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -17,7 +17,9 @@ import { AuthService, ToastService } from '@core';
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
             <div>
-              <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+              <label for="firstName" class="block text-sm font-medium text-gray-700"
+                >First Name</label
+              >
               <input
                 id="firstName"
                 type="text"
@@ -30,7 +32,9 @@ import { AuthService, ToastService } from '@core';
             </div>
 
             <div>
-              <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+              <label for="lastName" class="block text-sm font-medium text-gray-700"
+                >Last Name</label
+              >
               <input
                 id="lastName"
                 type="text"
@@ -116,7 +120,7 @@ export class RegisterComponent {
   private toastService = inject(ToastService);
 
   form: FormGroup;
-  loading = () => false;
+  loading = signal(false);
 
   constructor() {
     this.form = this.fb.group({
@@ -130,6 +134,7 @@ export class RegisterComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
+    this.loading.set(true);
 
     this.authService.register(this.form.value).subscribe({
       next: () => {
@@ -137,9 +142,10 @@ export class RegisterComponent {
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 2000);
+        this.loading.set(false);
       },
-      error: (error: any) => {
-        console.error('Registration error:', error);
+      error: () => {
+        this.loading.set(false);
       },
     });
   }

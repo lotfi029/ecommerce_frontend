@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -21,28 +21,23 @@ export class ProductService {
   createProduct(request: CreateProductRequest): Observable<ProductDetailedResponse> {
     return this.http.post<ProductDetailedResponse>(
       `${this.baseUrl}/catalog/api/v1/products/`,
-      request
+      request,
     );
   }
 
   // Bulk create products (Vendor)
-  bulkCreateProducts(
-    request: BulkCreateProductsRequest
-  ): Observable<ProductDetailedResponse[]> {
+  bulkCreateProducts(request: BulkCreateProductsRequest): Observable<ProductDetailedResponse[]> {
     return this.http.post<ProductDetailedResponse[]>(
       `${this.baseUrl}/catalog/api/v1/products/bulk`,
-      request
+      request,
     );
   }
 
   // Update product details (Vendor)
-  updateProduct(
-    id: string,
-    request: UpdateProductRequest
-  ): Observable<ProductDetailedResponse> {
+  updateProduct(id: string, request: UpdateProductRequest): Observable<ProductDetailedResponse> {
     return this.http.put<ProductDetailedResponse>(
       `${this.baseUrl}/catalog/api/v1/products/${id}`,
-      request
+      request,
     );
   }
 
@@ -50,7 +45,7 @@ export class ProductService {
   activateProduct(id: string): Observable<ProductDetailedResponse> {
     return this.http.patch<ProductDetailedResponse>(
       `${this.baseUrl}/catalog/api/v1/products/${id}/active`,
-      {}
+      {},
     );
   }
 
@@ -58,21 +53,21 @@ export class ProductService {
   archiveProduct(id: string): Observable<ProductDetailedResponse> {
     return this.http.patch<ProductDetailedResponse>(
       `${this.baseUrl}/catalog/api/v1/products/${id}/archive`,
-      {}
+      {},
     );
   }
 
   // Get product by ID
   getProductById(id: string): Observable<ProductDetailedResponse> {
-    return this.http.get<ProductDetailedResponse>(
-      `${this.baseUrl}/catalog/api/v1/products/${id}`
-    );
+    return this.http.get<ProductDetailedResponse>(`${this.baseUrl}/catalog/api/v1/products/${id}`);
   }
 
-  // Get all products
-  getAllProducts(): Observable<GetAllProductsResponse> {
-    return this.http.get<GetAllProductsResponse>(
-      `${this.baseUrl}/catalog/api/v1/products/`
-    );
+  // Get all products with pagination
+  getAllProducts(page: number = 1, size: number = 10): Observable<GetAllProductsResponse> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+
+    return this.http.get<GetAllProductsResponse>(`${this.baseUrl}/catalog/api/v1/products/`, {
+      params,
+    });
   }
 }

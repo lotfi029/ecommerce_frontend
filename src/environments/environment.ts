@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  catalogBaseUrl: '/catalog',
-  userBaseUrl: '/user',
+  catalogBaseUrl: 'https://localhost:7225',
+  userBaseUrl: 'https://localhost:7225',
 };

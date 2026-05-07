@@ -1,9 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ProductService, ToastService } from '@core';
-import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
+import {
+  BreadcrumbComponent,
+  BreadcrumbItem,
+} from '@shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-product-form',
@@ -32,7 +35,9 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
           </div>
 
           <div>
-            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+            <label for="description" class="block text-sm font-medium text-gray-700"
+              >Description</label
+            >
             <textarea
               id="description"
               formControlName="description"
@@ -73,7 +78,7 @@ export class ProductFormComponent {
   private toastService = inject(ToastService);
 
   form: FormGroup;
-  loading = () => false;
+  loading = signal(false);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Dashboard', url: '/dashboard' },
@@ -90,14 +95,15 @@ export class ProductFormComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
+    this.loading.set(true);
 
     this.productService.createProduct(this.form.value).subscribe({
       next: (product: any) => {
         this.toastService.success('Product created successfully!');
         this.router.navigate(['/catalog/products', product.id]);
       },
-      error: (error: any) => {
-        console.error('Error creating product:', error);
+      error: () => {
+        this.loading.set(false);
       },
     });
   }

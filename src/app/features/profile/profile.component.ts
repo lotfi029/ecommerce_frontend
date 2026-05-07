@@ -1,6 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
 import { ToastService } from '@core/services/toast.service';
 import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
@@ -19,9 +25,7 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
             <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-6">
               <!-- First Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> First Name </label>
                 <input
                   type="text"
                   formControlName="firstName"
@@ -32,9 +36,7 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
 
               <!-- Last Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Last Name </label>
                 <input
                   type="text"
                   formControlName="lastName"
@@ -45,9 +47,7 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
 
               <!-- Username (Read-only) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Username </label>
                 <input
                   type="text"
                   [value]="user()?.userName"
@@ -58,9 +58,7 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
 
               <!-- Email (Read-only) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
                 <input
                   type="email"
                   [value]="user()?.email"
@@ -71,9 +69,7 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
 
               <!-- Roles (Read-only) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Roles
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Roles </label>
                 <div class="flex flex-wrap gap-2">
                   @for (role of user()?.roles; track role) {
                     <span class="px-3 py-1 bg-primary text-white text-sm rounded-full">
@@ -85,12 +81,12 @@ import { UpdateProfileRequest, UserResponse } from '@core/models/auth.model';
 
               <!-- Status (Read-only) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Status </label>
                 <span
-                  [class]="'px-4 py-2 rounded-lg text-sm font-semibold ' + 
-                           (user()?.isDisable ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800')"
+                  [class]="
+                    'px-4 py-2 rounded-lg text-sm font-semibold ' +
+                    (user()?.isDisable ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800')
+                  "
                 >
                   {{ user()?.isDisable ? 'Disabled' : 'Active' }}
                 </span>
@@ -137,35 +133,46 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.getUserProfile().subscribe({
-      next: (response: any) => {
-        if (response.data) {
-          const user = response.data as UserResponse;
+    const current = this.authService.getCurrentUser();
+    if (current) {
+      this.profileForm.patchValue({
+        firstName: current.firstName,
+        lastName: current.lastName,
+      });
+    } else {
+      // Fetch from API
+      this.authService.getUserProfile().subscribe({
+        next: (user: UserResponse) => {
           this.profileForm.patchValue({
             firstName: user.firstName,
             lastName: user.lastName,
           });
-        }
-      },
-      error: (error: any) => {
-        this.toastService.error('Failed to load profile');
-        console.error('Profile load error:', error);
-      },
-    });
+        },
+        error: () => {
+          this.toastService.error('Failed to load profile');
+        },
+      });
+    }
   }
 
   onSubmit(): void {
     if (!this.profileForm.valid) return;
-
     this.isLoading = true;
+
     const updateRequest: UpdateProfileRequest = {
       firstName: this.profileForm.value.firstName,
       lastName: this.profileForm.value.lastName,
     };
 
-    // Note: This would require an updateProfile endpoint on the backend
-    // For now, we'll just show a toast
-    this.toastService.success('Profile updated successfully');
-    this.isLoading = false;
+    this.authService.updateProfile(updateRequest).subscribe({
+      next: () => {
+        this.toastService.success('Profile updated successfully');
+        this.isLoading = false;
+      },
+      error: () => {
+        this.toastService.error('Failed to update profile');
+        this.isLoading = false;
+      },
+    });
   }
 }

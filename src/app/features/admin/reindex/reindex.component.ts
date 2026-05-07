@@ -1,12 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReindexService, ToastService } from '@core';
-import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcrumb/breadcrumb.component';
+import {
+  BreadcrumbComponent,
+  BreadcrumbItem,
+} from '@shared/components/breadcrumb/breadcrumb.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-reindex',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent],
+  imports: [CommonModule, BreadcrumbComponent, ConfirmDialogComponent],
   template: `
     <div class="max-w-4xl mx-auto px-4 py-8">
       <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
@@ -20,9 +24,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="border border-gray-200 rounded-lg p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-2">Reindex Products</h2>
-            <p class="text-gray-600 text-sm mb-4">
-              Reindex all products in the catalog system.
-            </p>
+            <p class="text-gray-600 text-sm mb-4">Reindex all products in the catalog system.</p>
             <button
               (click)="reindexProducts()"
               [disabled]="loading()"
@@ -38,9 +40,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
 
           <div class="border border-gray-200 rounded-lg p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-2">Reindex Attributes</h2>
-            <p class="text-gray-600 text-sm mb-4">
-              Reindex all product attributes.
-            </p>
+            <p class="text-gray-600 text-sm mb-4">Reindex all product attributes.</p>
             <button
               (click)="reindexAttributes()"
               [disabled]="loading()"
@@ -56,9 +56,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
 
           <div class="border border-gray-200 rounded-lg p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-2">Reindex Categories</h2>
-            <p class="text-gray-600 text-sm mb-4">
-              Reindex all product categories.
-            </p>
+            <p class="text-gray-600 text-sm mb-4">Reindex all product categories.</p>
             <button
               (click)="reindexCategories()"
               [disabled]="loading()"
@@ -74,9 +72,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
 
           <div class="border border-gray-200 rounded-lg p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-2">Reindex All</h2>
-            <p class="text-gray-600 text-sm mb-4">
-              Reindex all data in the catalog system.
-            </p>
+            <p class="text-gray-600 text-sm mb-4">Reindex all data in the catalog system.</p>
             <button
               (click)="reindexAll()"
               [disabled]="loading()"
@@ -91,6 +87,16 @@ import { BreadcrumbComponent, BreadcrumbItem } from '@shared/components/breadcru
           </div>
         </div>
       </div>
+
+      <app-confirm-dialog
+        [isOpen]="showConfirm()"
+        title="Reindex All Data"
+        message="This will reindex all data and may take several minutes. Continue?"
+        confirmText="Yes, Reindex All"
+        [isDangerous]="true"
+        (confirmed)="onConfirmReindexAll()"
+        (cancelled)="showConfirm.set(false)"
+      ></app-confirm-dialog>
     </div>
   `,
 })
@@ -99,6 +105,7 @@ export class ReindexComponent {
   private toastService = inject(ToastService);
 
   loading = signal(false);
+  showConfirm = signal(false);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Dashboard', url: '/dashboard' },
@@ -149,10 +156,11 @@ export class ReindexComponent {
   }
 
   reindexAll(): void {
-    if (!confirm('This will reindex all data. This may take a while. Continue?')) {
-      return;
-    }
+    this.showConfirm.set(true); // opens dialog instead of browser confirm()
+  }
 
+  onConfirmReindexAll(): void {
+    this.showConfirm.set(false);
     this.loading.set(true);
     this.reindexService.reindexAll().subscribe({
       next: (response) => {

@@ -39,10 +39,16 @@ import { AuthService, UserService, ProductService, CategoryService } from '@core
         <div class="bg-white rounded-lg shadow-md p-6">
           <h2 class="text-lg font-bold text-gray-900 mb-4">Admin Actions</h2>
           <div class="space-y-2">
-            <a routerLink="/admin/users" class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+            <a
+              routerLink="/admin/users"
+              class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+            >
               Manage Users
             </a>
-            <a routerLink="/admin/reindex" class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+            <a
+              routerLink="/admin/reindex"
+              class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+            >
               Reindex Data
             </a>
           </div>
@@ -57,10 +63,16 @@ import { AuthService, UserService, ProductService, CategoryService } from '@core
             <div class="bg-white rounded-lg shadow-md p-6">
               <h2 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
               <div class="space-y-2">
-                <a routerLink="/catalog/products/create" class="block px-4 py-2 bg-success text-white rounded-md hover:bg-green-600">
+                <a
+                  routerLink="/catalog/products/create"
+                  class="block px-4 py-2 bg-success text-white rounded-md hover:bg-green-600"
+                >
                   Create New Product
                 </a>
-                <a routerLink="/catalog/products" class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+                <a
+                  routerLink="/catalog/products"
+                  class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+                >
                   View All Products
                 </a>
               </div>
@@ -72,10 +84,16 @@ import { AuthService, UserService, ProductService, CategoryService } from '@core
           <h2 class="text-lg font-bold text-gray-900 mb-4">Welcome to eCommerce</h2>
           <p class="text-gray-600 mb-4">Browse our catalog and discover amazing products.</p>
           <div class="space-y-2">
-            <a routerLink="/catalog/search" class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+            <a
+              routerLink="/catalog/search"
+              class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+            >
               Browse Products
             </a>
-            <a routerLink="/catalog/categories" class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+            <a
+              routerLink="/catalog/categories"
+              class="block px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+            >
               Browse Categories
             </a>
           </div>
@@ -127,9 +145,9 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private countCategories(categories: any[], count = 0): number {
-    return categories.reduce((acc, cat) => {
+  private countCategories(categories: any[]): number {
+    return categories.reduce((acc: number, cat: any) => {
       return acc + 1 + this.countCategories(cat.children || []);
-    }, count);
+    }, 0);
   }
 }

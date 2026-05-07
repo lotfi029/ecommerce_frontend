@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  catalogBaseUrl: 'https://api.ecommerce.com/catalog',
-  userBaseUrl: 'https://api.ecommerce.com/user',
+  catalogBaseUrl: 'https://localhost:7225/catalog',
+  userBaseUrl: 'https://localhost:7225/user',
 };

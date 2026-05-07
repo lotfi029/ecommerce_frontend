@@ -15,22 +15,45 @@ import { AuthService } from '@core/services/auth.service';
         </div>
 
         <div class="hidden md:flex items-center gap-6">
-          <a routerLink="/dashboard" routerLinkActive="text-primary font-semibold" class="text-gray-700 hover:text-primary">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="text-primary font-semibold"
+            class="text-gray-700 hover:text-primary"
+          >
             Dashboard
           </a>
-          <a routerLink="/catalog/search" routerLinkActive="text-primary font-semibold" class="text-gray-700 hover:text-primary">
+          <a
+            routerLink="/catalog/search"
+            routerLinkActive="text-primary font-semibold"
+            class="text-gray-700 hover:text-primary"
+          >
             Shop
           </a>
-          <a routerLink="/catalog/products" routerLinkActive="text-primary font-semibold" class="text-gray-700 hover:text-primary">
+          <a
+            routerLink="/catalog/products"
+            routerLinkActive="text-primary font-semibold"
+            class="text-gray-700 hover:text-primary"
+          >
             Products
           </a>
-          @if (currentUser() && (currentUser()?.roles?.includes('Vendor') || currentUser()?.roles?.includes('Admin'))) {
-            <a routerLink="/vendor" routerLinkActive="text-primary font-semibold" class="text-gray-700 hover:text-primary">
+          @if (
+            currentUser() &&
+            (currentUser()?.roles?.includes('Vendor') || currentUser()?.roles?.includes('Admin'))
+          ) {
+            <a
+              routerLink="/vendor"
+              routerLinkActive="text-primary font-semibold"
+              class="text-gray-700 hover:text-primary"
+            >
               Vendor
             </a>
           }
           @if (currentUser() && currentUser()?.roles?.includes('Admin')) {
-            <a routerLink="/admin/users" routerLinkActive="text-primary font-semibold" class="text-gray-700 hover:text-primary">
+            <a
+              routerLink="/admin/users"
+              routerLinkActive="text-primary font-semibold"
+              class="text-gray-700 hover:text-primary"
+            >
               Admin
             </a>
           }
@@ -39,7 +62,12 @@ import { AuthService } from '@core/services/auth.service';
         <div class="flex items-center gap-4">
           @if (currentUser()) {
             <div class="flex items-center gap-3">
-              <span class="text-sm text-gray-600">{{ currentUser()?.firstName }}</span>
+              <a
+                routerLink="/profile"
+                class="text-sm text-gray-600 hover:text-primary hover:underline"
+              >
+                {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+              </a>
               <button
                 (click)="logout()"
                 class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
@@ -49,10 +77,16 @@ import { AuthService } from '@core/services/auth.service';
             </div>
           } @else {
             <div class="flex gap-2">
-              <a routerLink="/login" class="px-4 py-2 text-primary hover:text-primary border border-primary rounded-md">
+              <a
+                routerLink="/login"
+                class="px-4 py-2 text-primary hover:text-primary border border-primary rounded-md"
+              >
                 Login
               </a>
-              <a routerLink="/register" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">
+              <a
+                routerLink="/register"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700"
+              >
                 Register
               </a>
             </div>
