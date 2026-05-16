@@ -3,8 +3,107 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-primary: #4f46e5;
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-secondary: #8b5cf6;
   --color-success: #10b981;
   --color-danger: #ef4444;
-  --color-warning: #fbbf24;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-surface: #f8fafc;
+  --color-muted: #94a3b8;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-medium transition-all;
+  }
+
+  .btn-outline {
+    @apply border border-gray-200 hover:border-primary text-gray-700 hover:text-primary px-4 py-2 rounded-xl transition-all;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .input-base {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition;
+  }
+
+  .label-base {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+  }
+
+  .title-lg {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  .title-md {
+    @apply text-lg font-semibold text-gray-800;
+  }
+
+  .text-body {
+    @apply text-sm text-gray-600;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    width: 0%;
+    margin-left: 0;
+  }
+  50% {
+    width: 70%;
+    margin-left: 0;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 1.5s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  @apply scroll-smooth;
 }

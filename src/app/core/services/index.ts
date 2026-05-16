@@ -11,3 +11,4 @@ export * from './product-variant.service';
 export * from './category-variant-attribute.service';
 export * from './reindex.service';
 export * from './toast.service';
+export * from './mock-data.service';

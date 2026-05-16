@@ -1,19 +1,17 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { ScrollTopComponent } from './shared/components/scroll-top/scroll-top.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, ToastComponent],
+  imports: [RouterOutlet, ToastComponent, ScrollTopComponent],
   template: `
-    <app-navbar></app-navbar>
+    <router-outlet></router-outlet>
     <app-toast></app-toast>
-    <main class="min-h-screen bg-gray-50">
-      <router-outlet></router-outlet>
-    </main>
+    <app-scroll-top></app-scroll-top>
   `,
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {}
